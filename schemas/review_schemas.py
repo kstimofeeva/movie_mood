@@ -5,9 +5,11 @@ from typing import Optional
 class ReviewBase(BaseModel):
     review_text: str
 
+#добавление отзыва
 class ReviewCreate(ReviewBase):
     movie_id: int
 
+#для пользователей
 class Review(ReviewBase):
     model_config = ConfigDict(from_attributes = True)
     id: int
