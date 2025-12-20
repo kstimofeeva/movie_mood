@@ -18,7 +18,7 @@ class ReviewService:
             if not isinstance(review_data.movie_id, int) or review_data.movie_id <= 0:
                 raise ValueError("Неверное значение ID фильма")
 
-            movie = self.db.query(Movie).filter(review_data.movie_id == Movie.id).first()
+            movie = self.db.query(Movie).filter(Movie.id == review_data.movie_id).first()
 
             if not movie:
                 raise ValueError (f"Такого фильма с ID {review_data.movie_id} не существует")
@@ -33,14 +33,14 @@ class ReviewService:
             )
             self.db.add(db_review)
             self.db.commit()
-            self.db.refresh()
+            self.db.refresh(db_review)
 
-            self.update_movie_mood(review_data.movie_id)
+            self._update_movie_mood(review_data.movie_id)
 
             return db_review
-        except ValueError:
+        except ValueError as e:
             self.db.rollback()
-            raise ValueError("Ошибка данных")
+            raise e
         except IntegrityError:
             self.db.rollback()
             raise Exception("Ошибка при сохранении отзыва в БД")
@@ -54,14 +54,14 @@ class ReviewService:
     #внутренняя функция без вызова исключений. true если норм обновилось настроение, false если где-то кринжанули (ни на что не влияет)
     def _update_movie_mood(self, movie_id: int) -> bool:
         try:
-            reviews = self.db.query(Review).filter(movie_id = Review.movie_id).all()
+            reviews = self.db.query(Review).filter(Review.movie_id == movie_id).all()
             if not reviews:
                 return False
             positive_count = sum(1 for i in reviews if i.sentiment == 'positive')
             negative_count = sum(1 for i in reviews if i.sentiment == 'negative')
             reviews_count = len(reviews)
 
-            movie = self.db.query(Movie).filter(movie_id == Movie.id).first()
+            movie = self.db.query(Movie).filter(Movie.id == movie_id).first()
 
             if not movie:
                 return False
@@ -88,9 +88,9 @@ class ReviewService:
             if not isinstance(movie_id, int) or movie_id <= 0:
                 raise ValueError("Неверное значение для ID фильма")
 
-            return self.db.query(Review).filter(movie_id == Review.movie_id).all()
-        except ValueError:
-            raise ValueError
+            return self.db.query(Review).filter(Review.movie_id == movie_id).all()
+        except ValueError as e:
+            raise e
         except SQLAlchemyError:
             raise Exception("Ошибка при получении отзыва из БД")
         except Exception:
@@ -101,10 +101,33 @@ class ReviewService:
             if not isinstance(review_id, int) or review_id <= 0:
                 raise ValueError("Неверное значение ID отзыва")
             return self.db.query(Review).filter(Review.id == review_id).first()
-        except ValueError:
-            raise ValueError
+        except ValueError as e:
+            raise e
         except SQLAlchemyError:
             raise Exception("Ошибка получения отзыва из бд")
         except Exception:
             raise Exception("Внутренняя ошибка сервера")
 
+    def delete_review(self, review_id: int) -> bool:
+        try:
+            if not isinstance(review_id, int) or review_id <= 0:
+                raise ValueError("Неверный ID отзыва")
+
+            review = self.db.query(Review).filter(Review.id == review_id).first()
+            if not review:
+                return False
+            movie_id = review.movie_id
+            self.db.delete(review)
+            self.db.commit()
+
+            self._update_movie_mood(movie_id)
+            return True
+        except ValueError as e:
+            self.db.rollback()
+            raise e
+        except SQLAlchemyError:
+            self.db.rollback()
+            raise Exception("Ошибка при удалении отзыва из бд")
+        except Exception:
+            self.db.rollback()
+            raise Exception("Внутренняя ошибка сервера")
