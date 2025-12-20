@@ -40,6 +40,14 @@ class MovieService:
         except Exception:
             raise Exception("Ошибка сервера")
 
+    def get_all_movies(self, skip: int = 0, limit: int = 100):
+        try:
+            movies = self.db.query(Movie).offset(skip).limit(limit).all()
+            return movies
+        except  SQLAlchemyError:
+            raise Exception("Ошибка при получении данных")
+        except Exception:
+            raise Exception("Ошибка сервера")
 
     #поиск фильма по названию / жанру
     def search_movies(self, title: str = None, genre: str = None):
