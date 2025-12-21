@@ -3,6 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
 
+import sys
+from PyQt6.QtWidgets import QApplication
+from frontend.main_window import MainWindow
+
 # Загружаем переменные из .env файла
 load_dotenv()
 
@@ -29,7 +33,9 @@ def home():
     return {
         "message": "Movie Mood API работает!",
         "database": db_url,
-        "port": os.getenv("PORT", "8000")
+        "port": os.getenv("PORT", "8000"),
+        "docs": "/docs",
+        "redoc": "/redoc"
     }
 
 
