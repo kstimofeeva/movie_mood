@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from database.models import Movie, Review
 from schemas.review_schemas import ReviewCreate
-from ml.sentyment_analyzer import analyzer
+from ml.sentiment_analyzer import analyzer
 
 
 class ReviewService:
