@@ -16,7 +16,7 @@ def create_movie(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, details = str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/", response_model = List[Movie])
 def get_movies(
@@ -24,7 +24,7 @@ def get_movies(
         limit:int = Query(100, ge=1, le=100, descriptoin="Лимит записей"),
         movie_service: MovieService = Depends(get_movie_service)
 ):
-    return movie_service.get_all_movies(skip=skip, limit=limit);
+    return movie_service.get_all_movies(skip=skip, limit=limit)
 
 @router.get("/{movie_id}", response_model=Movie)
 def get_movie(movie_id:int, movie_service: MovieService = Depends(get_movie_service)):
