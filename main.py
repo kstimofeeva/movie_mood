@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+from database.database import Database
 
 load_dotenv()
 
@@ -13,10 +14,16 @@ if not DATABASE_URL:
     print("DATABASE_URL не найден")
     exit(1)
 
-from database.database import Database
+movies_router=None
+reviews_router=None
+recommendations_router=None
+API_ROUTERS_AVAILABLE=False
 
 try:
-    from api.routers import movies_router, reviews_router, recommendations_router
+    from api.routers.movies import router as movies_router
+    from api.routers.reviews import router as reviews_router
+    from api.routers.recommendations import router as recommendations_router
+
     API_ROUTERS_AVAILABLE = True
 except ImportError as e:
     print("не удалось импортировать роутеры")
