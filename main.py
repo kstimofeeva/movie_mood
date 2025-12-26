@@ -69,60 +69,52 @@ app.add_middleware(
     allow_headers=['*']
 )
 
+
 def _add_test_data_if_empty():
-    from services.movie_service import MovieService
-    from services.review_service import ReviewService
-    from schemas.movie_schemas import MovieCreate
-    from schemas.review_schemas import ReviewCreate
-
-    session = database.get_session()
+    """Добавляет тестовые данные если база пустая"""
     try:
-        movie_service = MovieService(session)
+        from services.movie_service import MovieService
+        from services.review_service import ReviewService
+        from schemas.movie_schemas import MovieCreate
 
-        # Проверяем есть ли фильмы
-        existing_movies = movie_service.get_all_movies(limit=1)
+        session = database.get_session()
+        try:
+            movie_service = MovieService(session)
 
-        if not existing_movies:
-            test_movies = [
-                MovieCreate(
-                    title="Интерстеллар",
-                    genre="фантастика",
-                    description="Космическое путешествие через червоточину"
-                ),
-                MovieCreate(
-                    title="Начало",
-                    genre="фантастика",
-                    description="Проникновение в сны для кражи идей"
-                ),
-                MovieCreate(
-                    title="Побег из Шоушенка",
-                    genre="драма",
-                    description="История надежды и свободы"
-                ),
-            ]
+            # Просто проверяем есть ли фильмы
+            existing_movies = movie_service.get_all_movies(limit=1)
 
-            review_service = ReviewService(session)
+            if not existing_movies:
+                print("📝 Добавляем тестовые фильмы...")
 
-            for movie_data in test_movies:
-                movie = movie_service.create_movie(movie_data)
-                print(f"     🎥 Добавлен фильм: {movie.title}")
-
-                test_reviews = [
-                    "Отличный фильм! Очень понравилось.",
-                    "Интересный сюжет, хорошая игра актеров."
+                # ТОЛЬКО фильмы, без отзывов
+                test_movies = [
+                    MovieCreate(
+                        title="Интерстеллар",
+                        genre="фантастика",
+                        description="Космическое путешествие через червоточину"
+                    ),
+                    MovieCreate(
+                        title="Начало",
+                        genre="фантастика",
+                        description="Проникновение в сны для кражи идей"
+                    ),
                 ]
 
-                for review_text in test_reviews:
-                    review_data = ReviewCreate(
-                        movie_id=movie.id,
-                        review_text=review_text
-                    )
-                    review = review_service.create_review(review_data)
+                for movie_data in test_movies:
+                    try:
+                        movie = movie_service.create_movie(movie_data)
+                        print(f"     🎥 Добавлен фильм: {movie.title}")
+                    except Exception as e:
+                        print(f"     ⚠️  Не удалось добавить фильм: {e}")
+
+            print("✅ Тестовые данные проверены")
+
+        finally:
+            session.close()
 
     except Exception as e:
-        print(f"   ⚠️  Не удалось добавить тестовые данные: {e}")
-    finally:
-        session.close()
+        print(f"⚠️  Не удалось добавить тестовые данные: {e}")
 
 
 @app.get("/")
