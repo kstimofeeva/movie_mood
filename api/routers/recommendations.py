@@ -12,9 +12,18 @@ def get_recommendations_by_mood(
         limit: int = Query(10, ge=1, le=50, description="Количество рекомендаций"),
         movie_service: MovieService = Depends(get_movie_service)
 ):
-    movies = movie_service.get_movies_by_mood(mood)
-    if not movies:
-        raise HTTPException(status_code=404, detail="ильмы с таким настроением не найдены")
-    return movies
+    try:
+        valid_moods = ['neutral', 'positive', 'negative']
+        if mood.lower() not in valid_moods:
+            raise HTTPException(status_code=400, detail="недопустимое настроение")
+
+        movies = movie_service.get_movies_by_mood(mood.lower())
+        if not movies:
+            raise HTTPException(status_code=404, detail="aильмы с таким настроением не найдены")
+        return movies[:limit]
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Ошибка при получении фильмов")
 
 

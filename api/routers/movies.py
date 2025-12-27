@@ -16,41 +16,55 @@ def create_movie(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, details = str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/", response_model = List[Movie])
 def get_movies(
-        skip: int = Query(0, ge=0, description= "Пропустить первые  записей"),
-        limit:int = Query(100, ge=1, le=100, descriptoin="Лимит записей"),
+        skip: int = Query(0, ge=0, description="Пропустить первые N записей"),
+        limit: int = Query(100, ge=1, le=100, description="Лимит записей"),
         movie_service: MovieService = Depends(get_movie_service)
 ):
-    return movie_service.get_all_movies(skip=skip, limit=limit);
+    try:
+        return movie_service.get_all_movies(skip=skip, limit=limit)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Ошибка при получении фильмов")
 
 @router.get("/{movie_id}", response_model=Movie)
-def get_movie(movie_id:int, movie_service: MovieService = Depends(get_movie_service)):
-    movie = movie_service.get_movie(movie_id)
-    if not movie:
-        raise HTTPException(status_code=404, detail="Фильм не найден")
-    return movie
+def get_movie(movie_id: int, movie_service: MovieService = Depends(get_movie_service)):
+    try:
+        movie = movie_service.get_movie(movie_id)
+        if not movie:
+            raise HTTPException(status_code=404, detail="Фильм не найден")
+        return movie
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Ошибка при получении фильма")
 
 @router.get("/search/", response_model=List[Movie])
 def search_movies(
         title: Optional[str] = Query(None, description="Поиск по названию"),
         genre: Optional[str] = Query(None, description="Поиск по жанру"),
-        mood: Optional[str] = Query(None, description="Поиск по настроению"),
+        #mood: Optional[str] = Query(None, description="Поиск по настроению"),
         movie_service: MovieService = Depends(get_movie_service)
 ):
-    movies = movie_service.get_all_movies()
-    result = []
-    for movie in movies:
-        if title and title.lower() not in movie.title.lower():
-            continue
-        if genre and genre.lower not in (movie.genre or "").lower():
-            continue
-        if mood and mood.lower not in (movie.mood or "").lower():
-            continue
-        result.append(movie)
-    return result
+    try:
+        return movie_service.search_movies(title=title, genre=genre)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Ошибка при поиске фильмов")
+
+'''
+@router.get("/mood/{mood}", response_model=List[Movie])
+def get_movies_by_mood(
+        mood: str,
+        movie_service: MovieService = Depends(get_movie_service)
+):
+    try:
+        movies = movie_service.get_movies_by_mood(mood)
+        return movies
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Ошибка при поиске фильмов по настроению")
+'''
 
 @router.patch("/{movie_id}", response_model=Movie)
 def update_movie(
@@ -58,14 +72,21 @@ def update_movie(
         movie_update: MovieUpdate,
         movie_service: MovieService = Depends(get_movie_service)
 ):
-    movie = movie_service.update_movie(movie_id, movie_update)
-    if not movie:
-        raise HTTPException(status_code=404, detail="Фильм не найден")
-    return movie
+    try:
+        movie = movie_service.update_movie(movie_id, movie_update)
+        return movie
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Ошибка при обновлении фильма")
 
 @router.delete("/{movie_id}", status_code=204)
 def delete_movie(movie_id: int, movie_service: MovieService = Depends(get_movie_service)):
-    success = movie_service.delete_movie(movie_id)
-    if not success:
-        raise HTTPException(status_code = 404, detail="Фильм не найден")
-    return None
+    try:
+        success = movie_service.delete_movie(movie_id)
+        if not success:
+            raise HTTPException(status_code = 404, detail="Фильм не найден")
+        return None
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Ошибка при удалении фильма")
+

@@ -2,13 +2,42 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from database.models import Movie, Review
 from schemas.review_schemas import ReviewCreate
-from ml.sentyment_analyzer import analyzer
+#from ml.sentiment_analyzer import analyzer
 
+#пока заглушка вместо мльки
+class SentimentAnalyzer:
+    def predict(self, text: str) -> dict:
+        try:
+            positive_words = ['хорошо', 'крутой', 'классный', 'хороший', 'прекрасный', 'замечательный', 'восторг']
+            negative_words = ['плохой', 'кринж', 'ужасный', 'фигня', 'некачественный', 'скучный', 'разочарован']
+            text_lower = text.lower()
+            positive_count = sum(text_lower.count(word) for word in positive_words)
+            negative_count = sum(text_lower.count(word) for word in negative_words)
+            if positive_count > negative_count:
+                return {
+                    'sentiment': 'positive',
+                    'score': positive_count / text.size()
+                }
+            elif positive_count < negative_count:
+                return {
+                    'sentiment': 'negative',
+                    'score': negative_count / text.size()
+                }
+            else:
+                return {
+                    'sentiment': 'neutral',
+                    'score': 0.5
+                }
+        except Exception:
+            return {
+                'sentiment': 'neutral',
+                'score': 0.5
+            }
 
 class ReviewService:
     def __init__(self, db: Session):
         self.db = db
-        self.analyzer = analyzer
+        self.analyzer = SentimentAnalyzer()
 
     #создание отзыва
     def create_review(self, review_data: ReviewCreate) -> Review:
