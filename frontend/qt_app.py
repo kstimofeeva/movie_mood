@@ -11,6 +11,7 @@ def run_qt_app():
     window = MainWindow()
     window.show()
 
+
     sys.exit(app.exec())
 
 
