@@ -137,9 +137,11 @@ class MainWindow(QMainWindow):
         self.add_movie_window.show()
 
     def on_movie_added(self, movie_data: dict):
-        #Обработка добавления фильма (заглушка)
-        QMessageBox.information(self, "Фильм добавлен", f"Добавлен фильм: {movie_data}")
+        """Обработка добавления фильма"""
         self.load_movies()
+
+        if 'id' in movie_data:
+            QMessageBox.information(self, "Успех", f"Фильм добавлен! ID: {movie_data['id']}")
 
     def open_add_review_window(self):
         #Открывает окно добавления отзыва
