@@ -37,7 +37,7 @@ def get_movie(movie_id: int, movie_service: MovieService = Depends(get_movie_ser
             raise HTTPException(status_code=404, detail="Фильм не найден")
         return movie
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Ошибка при получении фильма")
+        raise HTTPException(status_code=500, detail=f"Ошибка при получении фильма. {e}")
 
 @router.get("/search/", response_model=List[Movie])
 def search_movies(

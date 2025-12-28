@@ -24,5 +24,5 @@ class Review(Base):
     sentiment_score = Column(Float)
     created_at = Column(DateTime, default = datetime.utcnow)
 
-    movies = relationship('Movie', back_populates = 'reviews')
+    movie = relationship('Movie', back_populates = 'reviews')
 

@@ -10,33 +10,33 @@ class MovieService:
 #добавление фильма в бд
     def create_movie(self, movie_data: MovieCreate) -> Movie:
         try:
-            db_movie = Movie (
-                title = movie_data.title,
-                genre = movie_data.genre,
-                description = movie_data.description
+            db_movie = Movie(
+                title=movie_data.title,
+                genre=movie_data.genre,
+                description=movie_data.description
             )
 
             self.db.add(db_movie)
             self.db.commit()
             self.db.refresh(db_movie)
             return db_movie
-        except IntegrityError:
+        except IntegrityError as e:
             self.db.rollback()
-            raise ValueError("Фильм с таким названием уже существует или нарушена целостность данных")
-        except SQLAlchemyError:
+            raise ValueError(f"Фильм с таким названием уже существует или нарушена целостность данныхю. {e}")
+        except SQLAlchemyError as e:
             self.db.rollback()
-            raise Exception("Ошибка при сохранении фильмов в БД")
+            raise Exception(f"Ошибка при сохранении фильмов в БД: {e}")
         except Exception:
             self.db.rollback()
             raise Exception("Ошибка сервера")
 
     #получение фильма по айдишнику
-    def get_movie(self, movie_id: int) -> Movie:
+    def get_movie(self, movie_id: int):
         try:
             movie = self.db.query(Movie).filter(Movie.id == movie_id).first()
             return movie
-        except SQLAlchemyError:
-            raise Exception("Ошибка при получении данных")
+        except SQLAlchemyError as e:
+            raise Exception(f"Ошибка при получении данных. {e}")
         except Exception:
             raise Exception("Ошибка сервера")
 
