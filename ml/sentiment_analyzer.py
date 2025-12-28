@@ -5,7 +5,7 @@ import os
 class SentimentAnalyzer:
     _model = None
 
-    def __init__(self, model_path='logreg_model.pkl'):
+    def __init__(self, model_path='ml/logreg_model.pkl'):
         self.model_path = model_path
         self._load_model()
 
