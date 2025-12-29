@@ -15,7 +15,6 @@ class MovieService:
                 genre = movie_data.genre,
                 description = movie_data.description
             )
-
             self.db.add(db_movie)
             self.db.commit()
             self.db.refresh(db_movie)

@@ -8,7 +8,7 @@ from database.database import Database
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL= ""
 
 if not DATABASE_URL:
     print("DATABASE_URL не найден")
