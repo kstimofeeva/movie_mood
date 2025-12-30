@@ -1,4 +1,4 @@
-#xокно выбора настроения
+#кнопка выбора настроения
 
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel
